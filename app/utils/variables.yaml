@@ -1,0 +1,6 @@
+origin_folder: "/usr/local/airflow/dags/data/origin"
+dumped_folder: "/usr/local/airflow/dags/data/dumped"
+toprocess_folder: "/usr/local/airflow/dags/data/toprocess"
+cleaned_folder: "/usr/local/airflow/dags/data/cleaned"
+
+sql_files: "/usr/local/airflow/dags/scripts/sql_files"

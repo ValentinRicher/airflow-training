@@ -1,0 +1,21 @@
+# Use postgres/example user/password credentials
+version: "3.1"
+
+services:
+  airflow:
+    image: puckel/docker-airflow
+    ports:
+      - 8080:8080
+    command: webserver
+    volumes:
+      - /Users/vricher/Documents/formations/airflow/airflow-pratical/app:/usr/local/airflow/dags
+  db:
+    image: postgres
+    restart: always
+    environment:
+      POSTGRES_PASSWORD: example
+  adminer:
+    image: adminer
+    restart: always
+    ports:
+      - 8081:8080
