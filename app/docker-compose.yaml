@@ -8,7 +8,7 @@ services:
       - 8080:8080
     command: webserver
     volumes:
-      - /Users/vricher/Documents/formations/airflow/airflow-pratical/app:/usr/local/airflow/dags
+      - .:/usr/local/airflow/dags
   db:
     image: postgres
     restart: always
