@@ -1,4 +1,6 @@
 .vscode
 __pycache__
 
-data_prep/
+data_prep/*
+!data_prep/taxi_analysis.ipynb
+!data_prep/2016_Yellow_Taxi_Trip_Data.csv
