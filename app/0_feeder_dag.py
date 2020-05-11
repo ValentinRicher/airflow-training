@@ -17,6 +17,7 @@ dag = DAG(
     catchup=False,
     default_args=default_args,
     schedule_interval="*/5 * * * *",
+    description="This feeder DAG simulates the dump of files every five minutes by NYC Open Data."
 )
 
 dump_trips = PythonOperator(
