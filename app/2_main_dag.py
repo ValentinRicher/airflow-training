@@ -1,17 +1,29 @@
-from airflow import DAG
-from airflow.operators.python_operator import PythonOperator
 import datetime
-from airflow.operators.postgres_operator import PostgresOperator
-from airflow.hooks.postgres_hook import PostgresHook
+from pathlib import Path
+
 import pandas as pd
 
+from airflow import DAG, settings
+from airflow.hooks.postgres_hook import PostgresHook
 from airflow.models import Connection
-from airflow import settings
+from airflow.operators.postgres_operator import PostgresOperator
+from airflow.operators.python_operator import PythonOperator
 from utils.config import config
-from pathlib import Path
 
 
 def create_conn(username, password, host=None):
+    """
+    Creates the connection to the PostgreSQL database programmatically.
+
+    Parameters
+    ----------
+    username : str
+        Username used for the database, set in the docker-compose.yaml.
+    password : str
+        Password to access the database, set in the docker-compose.yaml.
+    host : str
+        Host for the database, set in the docker-compose.yaml.
+    """
     new_conn = Connection(conn_id=f'postgres_connection',
                                   login=username,
                                   host=host if host else None)
@@ -40,12 +52,15 @@ dag = DAG(
     template_searchpath=[config["sql_files"]],
     catchup=False,
     default_args=default_args,
-    schedule_interval="*/5 * * * *",
+    schedule_interval=None,
+    description="Cleans the data received and saves it to database."
 )
 
 
-# t1, t2, t3 and t4 are examples of tasks created using operators
-def run_this_func(ds, **kwargs):
+def print_toprocess_filepath(ds, **kwargs):
+    """
+    Prints the file to be processed received from the trigger DAG.
+    """
     print(
         "Remotely received value of {} for key=message".format(
             kwargs["dag_run"].conf["toprocess_filepath"]
@@ -54,6 +69,23 @@ def run_this_func(ds, **kwargs):
 
 
 def clean_data(**kwargs):
+    """
+    Cleans data :
+    - Drops columns that are NA
+    - Drops rows where "pickup_longitude", "pickup_latitude", 
+    "dropoff_longitude", "dropoff_latitude" are 0
+    - Keeps only rows where "fare_amount" is 0 or above
+
+    Parameters
+    ----------
+    **kwargs : dict
+        Get the filepath with `kwargs["dag_run"].conf["toprocess_filepath"]`
+
+    Returns
+    -------
+    cleaned_filepath : str
+        The filepath of the cleaned csv.
+    """
     filepath = kwargs["dag_run"].conf["toprocess_filepath"]
     df = pd.read_csv(filepath)
     df.dropna(axis=1, how="all", inplace=True)
@@ -71,6 +103,14 @@ def clean_data(**kwargs):
 
 
 def load_data_to_db(data):
+    """
+    Loads the data to the PostgreSQL database.
+
+    Parameters
+    ----------
+    data : list
+        The csv data put in list format to be ingested by the SQL query.
+    """
 
     insert_sql = "INSERT INTO trips (VendorID, tpep_pickup_datetime, tpep_dropoff_datetime, passenger_count, trip_distance, pickup_longitude, pickup_latitude, RatecodeID, store_and_fwd_flag, dropoff_longitude, dropoff_latitude, payment_type, fare_amount, extra, mta_tax, tip_amount, tolls_amount, improvement_surcharge, total_amount) VALUES( %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)"
 
@@ -90,15 +130,27 @@ def load_data_to_db(data):
 
 
 def push_to_postgres(**kwargs):
+    """
+    Pushes the data to PostgreSQL database.
+
+    Parameters
+    ----------
+    **kwargs : dict
+        Get the filepath of the cleaned data with an XCOM thanks to the argument
+        kwargs["task_instance"].xcom_pull(task_ids="data_cleaner")
+    """
+
     filepath = kwargs["task_instance"].xcom_pull(task_ids="data_cleaner")
-    print(filepath)
     df = pd.read_csv(filepath)
     data_list = [list(row) for row in df.itertuples(index=False)]
     load_data_to_db(data_list)
 
 
 run_this = PythonOperator(
-    task_id="run_this", provide_context=True, python_callable=run_this_func, dag=dag
+    task_id="print_toprocess_filepath",
+    provide_context=True,
+    python_callable=print_toprocess_filepath,
+    dag=dag,
 )
 
 table_creator = PostgresOperator(
@@ -121,6 +173,5 @@ postgres_pusher = PythonOperator(
     provide_context=True,
     dag=dag
 )
-
 
 run_this >> [table_creator, data_cleaner] >> postgres_pusher

@@ -1,6 +1,7 @@
+from datetime import datetime, timedelta
+
 from airflow import DAG
 from airflow.operators.python_operator import PythonOperator
-from datetime import datetime, timedelta
 from scripts.move_file import move_file
 from utils.config import config
 
@@ -27,4 +28,5 @@ dump_trips = PythonOperator(
         'from_folder': config["origin_folder"],
         'to_folder': config["dumped_folder"]},
     dag=dag)
+
 dump_trips
