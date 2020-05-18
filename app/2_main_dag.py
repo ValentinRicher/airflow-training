@@ -11,30 +11,30 @@ from airflow.operators.python_operator import PythonOperator
 from utils.config import config
 
 
-def create_conn(username, password, host=None):
-    """
-    Creates the connection to the PostgreSQL database programmatically.
+# def create_conn(username, password, host=None):
+#     """
+#     Creates the connection to the PostgreSQL database programmatically.
 
-    Parameters
-    ----------
-    username : str
-        Username used for the database, set in the docker-compose.yaml.
-    password : str
-        Password to access the database, set in the docker-compose.yaml.
-    host : str
-        Host for the database, set in the docker-compose.yaml.
-    """
-    new_conn = Connection(conn_id=f'postgres_connection',
-                                  login=username,
-                                  host=host if host else None)
-    new_conn.set_password(password)
+#     Parameters
+#     ----------
+#     username : str
+#         Username used for the database, set in the docker-compose.yaml.
+#     password : str
+#         Password to access the database, set in the docker-compose.yaml.
+#     host : str
+#         Host for the database, set in the docker-compose.yaml.
+#     """
+#     new_conn = Connection(conn_id=f'postgres_connection',
+#                                   login=username,
+#                                   host=host if host else None)
+#     new_conn.set_password(password)
 
-    session = settings.Session()
-    session.add(new_conn)
-    session.commit()
+#     session = settings.Session()
+#     session.add(new_conn)
+#     session.commit()
 
 
-create_conn("postgres", "example", "db")
+# create_conn("postgres", "example", "db")
 
 # Following are defaults which can be overridden later on
 default_args = {
@@ -111,12 +111,10 @@ def load_data_to_db(data):
     data : list
         The csv data put in list format to be ingested by the SQL query.
     """
-
     insert_sql = "INSERT INTO trips (VendorID, tpep_pickup_datetime, tpep_dropoff_datetime, passenger_count, trip_distance, pickup_longitude, pickup_latitude, RatecodeID, store_and_fwd_flag, dropoff_longitude, dropoff_latitude, payment_type, fare_amount, extra, mta_tax, tip_amount, tolls_amount, improvement_surcharge, total_amount) VALUES( %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)"
-
     # create postgres_hook
     pg_hook = PostgresHook(
-        postgres_conn_id="postgres_connection", schema="postgres")
+        postgres_conn_id="postgres_connection", schema="taxi_db")
     # connect to the PostgreSQL database
     connection = pg_hook.get_conn()
     # create a new cursor
@@ -139,7 +137,6 @@ def push_to_postgres(**kwargs):
         Get the filepath of the cleaned data with an XCOM thanks to the argument
         kwargs["task_instance"].xcom_pull(task_ids="data_cleaner")
     """
-
     filepath = kwargs["task_instance"].xcom_pull(task_ids="data_cleaner")
     df = pd.read_csv(filepath)
     data_list = [list(row) for row in df.itertuples(index=False)]
