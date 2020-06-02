@@ -1,3 +1,4 @@
+import random
 from datetime import datetime, timedelta
 
 from airflow import DAG
@@ -13,11 +14,14 @@ default_args = {
     "retry_delay": timedelta(minutes=1),
 }
 
+random.seed(42)
+randomCronString = "* {} * * *".format(random.randint(5, 8))
+
 dag = DAG(
     "feeder",
     catchup=False,
     default_args=default_args,
-    schedule_interval="*/5 * * * *",
+    schedule_interval=randomCronString,
     description="This feeder DAG simulates the dump of files every five minutes by NYC Open Data."
 )
 
