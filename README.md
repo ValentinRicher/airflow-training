@@ -7,11 +7,14 @@ Install Docker
 
 ## Setup
 
-Clone the repository
+1. Clone the repository
 
-Launch Docker
+2. Launch Docker
 
-```cd airflow-pratical/app/```
+3. ```cd airflow-pratical/app/```
 
-```docker-compose up```
+4. ```docker-compose up```
 
+5. Go to localhost:8080 : this is the Airflow UI
+
+6. Go to localhost:8081 : this is the Adminer to see what is happening inside the database
