@@ -43,26 +43,26 @@ def conditionally_trigger(context, dag_run_obj):
 
     Returns
     -------
-    dag_run_obj :
-
+    dag_run_obj : airflow.models.dagrun
+        Describes an instance of a DAG.
     """
 
-    dumped_folder = pathlib.Path(config["dumped_folder"])
-    toprocess_folder = pathlib.Path(config["toprocess_folder"])
-    files = list(pathlib.Path(dumped_folder).rglob("*.csv"))
-    if files:
-        dumped_filepath, toprocess_filepath = move_file(
-            dumped_folder, toprocess_folder)
-        dag_run_obj.payload = {"toprocess_filepath": str(toprocess_filepath)}
-        return dag_run_obj
+    # dumped_folder = pathlib.Path(config["dumped_folder"])
+    # toprocess_folder = pathlib.Path(config["toprocess_folder"])
+    # files = list(pathlib.Path(dumped_folder).rglob("*.csv"))
+    # if files:
+    #     dumped_filepath, toprocess_filepath = move_file(
+    #         dumped_folder, toprocess_folder)
+    #     dag_run_obj.payload = {"toprocess_filepath": str(toprocess_filepath)}
+    #     return dag_run_obj
 
 
 # https://airflow.apache.org/docs/stable/_api/airflow/operators/dagrun_operator/index.html#module-airflow.operators.dagrun_operator
-trigger = TriggerDagRunOperator(
-    task_id="trigger_dagrun",
-    trigger_dag_id="main",
-    python_callable=conditionally_trigger,
-    dag=dag,
-)
+# trigger = TriggerDagRunOperator(
+#     task_id="trigger_dagrun",
+#     trigger_dag_id="main",
+#     python_callable=conditionally_trigger,
+#     dag=dag,
+# )
 
-trigger
+# trigger

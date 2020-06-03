@@ -5,7 +5,7 @@ import pathlib
 
 
 def move_file(from_folder, to_folder):
-    """Moves the most older csv file from from_folder to to_folder.
+    """Moves the oldest csv file from from_folder to to_folder.
 
     Parameters
     ----------
