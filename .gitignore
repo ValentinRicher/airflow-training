@@ -5,3 +5,8 @@ data_prep/*
 !data_prep/taxi_analysis.ipynb
 !data_prep/2016_Yellow_Taxi_Trip_Data.csv
 !data_prep/requirements.txt
+
+app/data/cleaned/
+app/data/dumped/
+app/data/origin/
+app/data/toprocess/
