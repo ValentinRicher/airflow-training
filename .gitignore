@@ -8,5 +8,4 @@ data_prep/*
 
 app/data/cleaned/
 app/data/dumped/
-app/data/origin/
 app/data/toprocess/
