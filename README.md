@@ -1,5 +1,8 @@
-# airflow-practical
+# airflow-training
 
+![alt text](https://upload.wikimedia.org/wikipedia/commons/d/de/AirflowLogo.png)
+
+This repository is a hand-on training to master Airflow concepts. I use this content during my teaching sessions.
 
 ## Prerequisites
 
